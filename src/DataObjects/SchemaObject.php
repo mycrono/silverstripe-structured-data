@@ -11,7 +11,7 @@ use SilverStripe\ORM\ValidationResult;
 use SilverStripe\Security\Permission;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
-use Opis\JsonSchema\{Errors\ValidationError, Validator};
+use Opis\JsonSchema\{Errors\ValidationError, Validator, Errors\ErrorFormatter};
 
 
 /**
@@ -129,10 +129,11 @@ class SchemaObject extends DataObject
             if ($ignore_invalid_data || $validation_result->isValid()) {
                 return true;
             } else {
+                $formatter = new ErrorFormatter();
                 $error = _t(
                     __CLASS__ . '.DATA_DOES_NOT_COMPLY_SCHEMA',
                     '_Data does not comply with schema: {schema_name}, error: {validator_error}',
-                    ["validator_error" => $validation_result->error(), "schema_name" => $schema_name]
+                    ["validator_error" => join(",", $formatter->formatFlat($validation_result->error())), "schema_name" => $schema_name]
                 );
                 return false;
             }
